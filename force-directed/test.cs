@@ -17,8 +17,16 @@ namespace force_directed
             gc.AddEdge(2, 4);
             gc.AddEdge(3, 4);
             graph g = gc.create();
-            
-            DistanceMatrix D = new DistanceMatrix(g);
+
+            ForceDirected FD = new ForceDirected(g);
+            for (int i = 0; i < g.N; i++)
+            {
+                Console.WriteLine("node = " + i + "\t" + FD.x[i] + "\t" + FD.y[i]);
+            }
+            Console.WriteLine();
+            FD.ComputeDisplacement(g);
+
+            Console.ReadKey();
         }
     }
 }
