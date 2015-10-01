@@ -5,43 +5,34 @@ using System.Text;
 
 namespace force_directed
 {
-    public class DistanceMatrix
+    public class DistanceMatrix : Matrix
     {
-        private int[,] D;
-        private int size;
-
-        public int this[int i, int j] { get { return D[i, j]; } set { D[i, j] = value; } }
-
         // matrix initialization based on adjacency matrix
-        public DistanceMatrix(graph g)
+        public DistanceMatrix(graph gh): base(gh)
         {
-            size = g.N;
-            int M = size * size;
-            D = new int[size, size];
-            for (int i = 0; i < size; i++)
-                for (int j = 0; j < size; j++)
-                    D[i, j] = M;
-            for (int i = 0; i < size; i++)
-                D[i, i] = 0;
-            for (int k = 0; k < size; k++)
-                foreach (int node in g.Adj(k))
-                    D[k, node] = 1;
+            int s = this.S;
+            int M = s * s;
+
+            for (int i = 0; i < s; i++)
+                for (int j = 0; j < s; j++)
+                {
+                    if (this[i, j] != 1)
+                        this[i, j] = M;
+                    this[i, i] = 0;
+                }
             floid();
         }
 
-        // distance computation
-        void floid()
+        // compute distances
+        private void floid()
         {
-            for (int i = 0; i < size; i++)
-                for (int j = 0; j < size; j++)
-                    for (int k = 0; k < size; k++)
-                        if (D[j, k] > D[j, i] + D[i, k])
-                            D[j, k] = D[j, i] + D[i, k];
+            for (int i = 0; i < this.S; i++)
+                for (int j = 0; j < this.S; j++)
+                    for (int k = 0; k < this.S; k++)
+                        if (this[j, k] > this[j, i] + this[i, k])
+                            this[j, k] = this[j, i] + this[i, k];
         }
 
-        public int S
-        {
-            get { return size; }
-        }
+
     }
 }
