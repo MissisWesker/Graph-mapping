@@ -8,8 +8,9 @@ namespace force_directed
     class ForceDirected
     {
         public double[] x, y;
-        private DistanceMatrix distance;
+        public double[] dx, dy;
         private double h = 0.01;
+        private graph g;
 
         public static Random rand = new Random();
 
@@ -17,7 +18,9 @@ namespace force_directed
         {
             x = new double[g.N];
             y = new double[g.N];
-            distance = new DistanceMatrix(g);
+            dx = new double[g.N];
+            dy = new double[g.N];
+            this.g = g;
             GetInitialSolution();
         }
 
@@ -30,27 +33,51 @@ namespace force_directed
             }
         }
 
-        public void ComputeDisplacement(graph g)
+        public void Iterate()
         {
-            double dx, dy;
-            double dist, force;
+            for (int j = 0; j < g.N; j++)
+                dx[j] = dy[j] = 0;
 
             for (int i = 0; i < g.N; i++)
             {
                 foreach (int j in g.Adj(i))
                 {
-                    dist = Math.Sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
-                    force = dist - 1;
-                    dx = (x[j] - x[i]) * force * h;
-                    dy = (y[j] - y[i]) * force * h;
-                    x[i] = x[i] + dx;
-                    y[i] = y[i] + dy;
-                    for (int s = 0; s < g.N; s++)
-                        Console.WriteLine("node = " + s + "\t" + x[s] + "\t" + y[s]);
-                    Console.WriteLine();
-                    //Console.WriteLine("i = " + i + "\t" + "j = " + j + "\t"+ x[i] + "\t" + y[i]);
+                    double dist = Math.Sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
+                    dx[i] += (x[j] - x[i]) * dist * h;
+                    dy[i] += (y[j] - y[i]) * dist * h;
                 }
             }
+
+            for (int i = 0; i < g.N; i++)
+            {
+                for (int j = 0; j < g.N; j++)
+                {
+                    double dist = (x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]);
+                    double force = 1.0 / (dist + 0.01);
+                    dx[i] -= (x[j] - x[i]) * force * h;
+                    dy[i] -= (y[j] - y[i]) * force * h;
+                }
+            }
+
+            for (int i = 0; i < g.N; i++)
+            {
+                x[i] = x[i] + dx[i];
+                y[i] = y[i] + dy[i];
+            }
+        }
+
+        public double GlobalForce()
+        {
+            double res = 0.0;
+            for (int i = 0; i < g.N; i++)
+            {
+                for (int j = 0; j < g.N; j++)
+                {
+                    double dist = Math.Sqrt(dx[i] * dx[i] + dy[i] * dy[i]);
+                    res += dist;
+                }
+            }
+            return res;
         }
     }
 }
