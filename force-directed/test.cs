@@ -9,6 +9,18 @@ namespace force_directed
     {
         static void Main()
         {
+            graph g = generate_graph();
+            ForceDirected FD = new ForceDirected(g);
+
+            for (int i = 0; i < 1500; i++)
+            {
+                FD.Iterate();
+            }
+            Console.ReadKey();
+        }
+
+        private static graph generate_graph()
+        {
             graph.creator gc = new graph.creator(5);
             gc.AddEdge(0, 1);
             gc.AddEdge(0, 2);
@@ -17,16 +29,7 @@ namespace force_directed
             gc.AddEdge(2, 4);
             gc.AddEdge(3, 4);
             graph g = gc.create();
-
-            ForceDirected FD = new ForceDirected(g);
-            for (int i = 0; i < g.N; i++)
-            {
-                Console.WriteLine("node = " + i + "\t" + FD.x[i] + "\t" + FD.y[i]);
-            }
-            Console.WriteLine();
-            FD.ComputeDisplacement(g);
-
-            Console.ReadKey();
+            return g;
         }
     }
 }
