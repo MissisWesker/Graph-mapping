@@ -5,6 +5,19 @@ using System.Text;
 
 namespace force_directed
 {
+    public struct solution
+    {
+        public graph source;
+        public graph result;
+        public Dictionary<int, int> map;
+    }
+
+    public struct point
+    {
+        public double x;
+        public double y;
+    }
+
     class ForceDirected
     {
         public double[] x, y;
