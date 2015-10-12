@@ -7,65 +7,63 @@ namespace force_directed
 {
     public class Reducer
     {
-        private graph g, ng;
-        private Dictionary<int,int> new_graph;
-        private int[,] weight;
+        private solution sln;
         private static Random rand = new Random(0);
         private List<int> nodes;
 
         public Reducer(graph g)
         {
-            this.g = g;
-            new_graph = new Dictionary<int,int>(g.N);
+            sln.source = g;
+            sln.map = new Dictionary<int, int>(g.N);
         }
 
-        public graph Reduce()
+        public solution Reduce()
         {
             int current, next, n = 0, k = 0;
-            nodes = new List<int>(g.N);
-            for (int i = 0; i < g.N; i++)
+            nodes = new List<int>(sln.source.N);
+            for (int i = 0; i < sln.source.N; i++)
                 nodes.Add(i);
             
             do
             {
                 int r = rand.Next(nodes.Count);
                 current = nodes[r];
-                new_graph[current] = n;
+                sln.map[current] = n;
                 k++;
                 nodes.RemoveAt(nodes.IndexOf(current));
                 next = GetNeighbour(current);
                 if (next != -1)
                 {
-                    new_graph[next] = n;
+                    sln.map[next] = n;
                     nodes.RemoveAt(nodes.IndexOf(next));
                     k++;
                 }
                 n++;
             }
-            while (k != g.N);
+            while (k != sln.source.N);
 
-            weight = new int[n, n];
+            int[,] weight = new int[n, n];
             graph.creator gc = new graph.creator(n);
-            for (int i = 0; i < g.N; i++)
+            for (int i = 0; i < sln.source.N; i++)
             {
-                foreach (int j in g.Adj(i))
+                foreach (int j in sln.source.Adj(i))
                 {
-                    if ((new_graph[j] != new_graph[i]) && (j > i))
+                    if ((sln.map[j] != sln.map[i]) && (j > i))
                     {
-                        if (weight[new_graph[i], new_graph[j]] == 0)
-                            gc.AddEdge(new_graph[i], new_graph[j]);
-                        weight[new_graph[i], new_graph[j]]++;
-                        weight[new_graph[j], new_graph[i]]++;
+                        if (weight[sln.map[i], sln.map[j]] == 0)
+                            gc.AddEdge(sln.map[i], sln.map[j]);
+                        weight[sln.map[i], sln.map[j]]++;
+                        weight[sln.map[j], sln.map[i]]++;
                     }
                 }
             }
-            ng = gc.create();
-            return ng;
+            sln.result = gc.create();
+            return sln;
         }
 
         private int GetNeighbour(int node)
         {
-            foreach (int j in g.Adj(node))
+            foreach (int j in sln.source.Adj(node))
                 if (nodes.Contains(j))
                     return j;
             return -1;
