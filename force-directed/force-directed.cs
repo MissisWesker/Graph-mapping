@@ -5,81 +5,96 @@ using System.Text;
 
 namespace force_directed
 {
-    public struct solution
-    {
-        public graph source;
-        public graph result;
-        public Dictionary<int, int> map;
-    }
-
-    public struct point
-    {
-        public double x;
-        public double y;
-    }
-
     class ForceDirected
     {
-        public double[] x, y;
-        public double[] dx, dy;
+        private double[] dx, dy;
         private double h = 0.01;
         private graph g;
+        private solution sln;
+        private point[] pos;
 
-        public static Random rand = new Random();
+        public static Random rand = new Random(0);
 
-        public ForceDirected(graph g)
+        public ForceDirected(graph g, point[] p)
         {
-            x = new double[g.N];
-            y = new double[g.N];
+            this.g = g;
+            pos = p;
             dx = new double[g.N];
             dy = new double[g.N];
-            this.g = g;
-            GetInitialSolution();
-        }
-
-        private void GetInitialSolution()
-        {
-            for (int i = 0; i < x.Length; i++)
+            for (int i = 0; i < g.N; i++)
             {
-                x[i] = rand.NextDouble();
-                y[i] = rand.NextDouble();
+                dx[i] = 0;
+                dy[i] = 0;
+                pos[i].x = p[i].x;
+                pos[i].y = p[i].y;
             }
         }
 
-        public void Iterate()
+        public ForceDirected(solution sln)
         {
-            for (int j = 0; j < g.N; j++)
-                dx[j] = dy[j] = 0;
-
-            for (int i = 0; i < g.N; i++)
+            this.sln = sln;
+            int n = sln.source.N;
+            pos = new point[n];
+            dx = new double[n];
+            dy = new double[n];
+            for (int i = 0; i < n; i++)
             {
-                foreach (int j in g.Adj(i))
-                {
-                    double dist = Math.Sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
-                    dx[i] += (x[j] - x[i]) * dist * h;
-                    dy[i] += (y[j] - y[i]) * dist * h;
-                }
+                dx[i] = 0;
+                dy[i] = 0;
             }
+        }
 
-            for (int i = 0; i < g.N; i++)
+        //private void GetInitialSolution()
+        //{
+        //    for (int i = 0; i < x.Length; i++)
+        //    {
+        //        x[i] = rand.NextDouble();
+        //        y[i] = rand.NextDouble();
+        //    }
+        //}
+
+        public point[] Iterate(int iterations)
+        {
+            for (int k = 0; k < iterations; k++)
             {
                 for (int j = 0; j < g.N; j++)
                 {
-                    double dist = (x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]);
-                    double force = 1.0 / (dist + 0.01);
-                    dx[i] -= (x[j] - x[i]) * force * h;
-                    dy[i] -= (y[j] - y[i]) * force * h;
+                    dx[j] = 0;
+                    dy[j] = 0;
                 }
-            }
 
-            for (int i = 0; i < g.N; i++)
-            {
-                x[i] = x[i] + dx[i];
-                y[i] = y[i] + dy[i];
+                for (int i = 0; i < g.N; i++)
+                {
+                    foreach (int j in g.Adj(i))
+                    {
+                        double dist = Math.Sqrt((pos[i].x - pos[j].x) * (pos[i].x - pos[j].x) + (pos[i].y - pos[j].y) * (pos[i].y - pos[j].y));
+                        dx[i] += (pos[j].x - pos[i].x) * dist * h;
+                        dy[i] += (pos[j].y - pos[i].y) * dist * h;
+                    }
+                }
+
+                for (int i = 0; i < g.N; i++)
+                {
+                    for (int j = 0; j < g.N; j++)
+                    {
+                        double dist = (pos[i].x - pos[j].x) * (pos[i].x - pos[j].x) + (pos[i].y - pos[j].y) * (pos[i].y - pos[j].y);
+                        double force = 1.0 / (dist + 0.01);
+                        dx[i] -= (pos[j].x - pos[i].x) * force * h;
+                        dy[i] -= (pos[j].y - pos[i].y) * force * h;
+                    }
+                }
+
+                for (int i = 0; i < g.N; i++)
+                {
+                    pos[i].x = pos[i].x + dx[i];
+                    pos[i].y = pos[i].y + dy[i];
+                }
+                Console.Write("\ngforce:{0:f3}", GlobalForce(g));
             }
+            return pos;
         }
 
-        public double GlobalForce()
+        public double GlobalForce(graph g)
         {
             double res = 0.0;
             for (int i = 0; i < g.N; i++)

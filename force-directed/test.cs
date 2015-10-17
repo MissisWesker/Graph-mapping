@@ -10,34 +10,30 @@ namespace force_directed
         static void Main()
         {
             graph g = generate_graph();
-            ForceDirected FD = new ForceDirected(g);
-            for (int i = 0; i < 500; i++)
-            {
-                Console.Write("\ngforce:{0:f3}", FD.GlobalForce());
-                FD.Iterate();
-            }
-            drawer.Paint(g, FD.x, FD.y, 500, 500, "test_first_graph.png");
-
             Reducer d = new Reducer(g);
+            point[] position;
+            Random rand = new Random(0);
+
             solution s = d.Reduce();
-            FD = new ForceDirected(s.result);
-            for (int i = 0; i < 500; i++)
+            
+            position = new point[s.result.N];
+            for (int i = 0; i < position.Length; i++)
             {
-                Console.Write("\ngforce:{0:f3}", FD.GlobalForce());
-                FD.Iterate();
+                position[i].x = rand.NextDouble();
+                position[i].y = rand.NextDouble();
             }
-            drawer.Paint(s.result, FD.x, FD.y, 500, 500, "test_second_graph.png");
 
-            d = new Reducer(s.result);
-            solution s2 = d.Reduce();
-            FD = new ForceDirected(s2.result);
-            for (int i = 0; i < 500; i++)
+            ForceDirected FD = new ForceDirected(s.result, position);
+            position = FD.Iterate(300);
+            int size = s.result.N;
+            double[] x = new double[size];
+            double[] y = new double[size];
+            for (int i = 0; i < size; i++)
             {
-                Console.Write("\ngforce:{0:f3}", FD.GlobalForce());
-                FD.Iterate();
+                x[i] = position[i].x;
+                y[i] = position[i].y;
             }
-            drawer.Paint(s2.result, FD.x, FD.y, 500, 500, "test_third_graph.png");
-
+            drawer.Paint(s.result, x, y, 500, 500, "result_graph.png");
             Console.ReadKey();
         }
 
