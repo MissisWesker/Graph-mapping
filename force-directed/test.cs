@@ -36,8 +36,8 @@ namespace force_directed
             int size = stack.Count;
             for (int i = 0; i < size; i++)
             {
-                FD = new ForceDirected(stack.Peek());
-                position = FD.GetSolution(position);
+                FD = new ForceDirected(stack.Peek(), position);
+                position = FD.PreciseSolution();
                 stack.Pop();
             }
 
@@ -48,7 +48,7 @@ namespace force_directed
                 x[i] = position[i].x;
                 y[i] = position[i].y;
             }
-            drawer.Paint(g, x, y, 500, 500, "result_graph.png");
+            drawer.Paint(g, position, 500, 500, "result_graph.png");
             Console.ReadKey();
         }
 

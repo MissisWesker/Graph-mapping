@@ -8,8 +8,16 @@ namespace force_directed
 {
     class drawer
     {
-        public static void Paint(graph g, double[] x, double[] y, int width, int height, string fname)
+        public static void Paint(graph g, point[] p, int width, int height, string fname)
         {
+            double[] x = new double[p.Length];
+            double[] y = new double[p.Length];
+            for (int i = 0; i < p.Length; i++)
+            {
+                x[i] = p[i].x;
+                y[i] = p[i].y;
+            }
+
             double bx = x.Max();
             double ax = x.Min();
             double by = y.Max();

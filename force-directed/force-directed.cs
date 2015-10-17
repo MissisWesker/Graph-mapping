@@ -30,7 +30,7 @@ namespace force_directed
             }
         }
 
-        public ForceDirected(solution sln)
+        public ForceDirected(solution sln, point[] p)
         {
             this.sln = sln;
             int n = sln.source.N;
@@ -41,17 +41,10 @@ namespace force_directed
             {
                 dx[i] = 0;
                 dy[i] = 0;
+                pos[i].x = p[sln.map[i]].x;
+                pos[i].y = p[sln.map[i]].y;
             }
         }
-
-        //private void GetInitialSolution()
-        //{
-        //    for (int i = 0; i < x.Length; i++)
-        //    {
-        //        x[i] = rand.NextDouble();
-        //        y[i] = rand.NextDouble();
-        //    }
-        //}
 
         public point[] Iterate(int iterations)
         {
@@ -94,20 +87,9 @@ namespace force_directed
             return pos;
         }
 
-        public point[] GetSolution(point[] p)
+        public point[] PreciseSolution()
         {
             List<int> cluster_node = new List<int>(2);
-
-            for (int k = 0; k < sln.result.N; k++)
-            {
-                cluster_node.Clear();
-                foreach (var match in sln.map.Where(s => s.Value == k))
-                {
-                    cluster_node.Add(match.Key);
-                    pos[match.Key].x = p[k].x;
-                    pos[match.Key].y = p[k].y;
-                }
-            }
 
             for (int k = 0; k < sln.result.N; k++)
             {
@@ -153,7 +135,7 @@ namespace force_directed
                             x[j] = pos[j].x;
                             y[j] = pos[j].y;
                         }
-                        drawer.Paint(sln.source, x, y, 500, 500, string.Format("test_{1}_{0}.png", s / 50, k));
+                        drawer.Paint(sln.source, pos, 500, 500, string.Format("test_{1}_{0}.png", s / 50, k));
                     }
                 }
             }
