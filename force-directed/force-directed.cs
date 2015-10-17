@@ -94,6 +94,72 @@ namespace force_directed
             return pos;
         }
 
+        public point[] GetSolution(point[] p)
+        {
+            List<int> cluster_node = new List<int>(2);
+
+            for (int k = 0; k < sln.result.N; k++)
+            {
+                cluster_node.Clear();
+                foreach (var match in sln.map.Where(s => s.Value == k))
+                {
+                    cluster_node.Add(match.Key);
+                    pos[match.Key].x = p[k].x;
+                    pos[match.Key].y = p[k].y;
+                }
+            }
+
+            for (int k = 0; k < sln.result.N; k++)
+            {
+                cluster_node.Clear();
+                foreach (var match in sln.map.Where(s => s.Value == k))
+                    cluster_node.Add(match.Key);
+
+                for (int s = 0; s < 100; s++)
+                {
+                    for (int t = 0; t < cluster_node.Count; t++)
+                    {
+                        int i = cluster_node[t];
+                        dx[i] = 0;
+                        dy[i] = 0;
+                        foreach (int j in sln.source.Adj(i))
+                        {
+                            double dist = Math.Sqrt((pos[i].x - pos[j].x) * (pos[i].x - pos[j].x) + (pos[i].y - pos[j].y) * (pos[i].y - pos[j].y));
+                            dx[i] += (pos[j].x - pos[i].x) * dist * h;
+                            dy[i] += (pos[j].y - pos[i].y) * dist * h;
+                        }
+
+                        for (int j = 0; j < sln.source.N; j++)
+                        {
+                            double dist = (pos[i].x - pos[j].x) * (pos[i].x - pos[j].x) + (pos[i].y - pos[j].y) * (pos[i].y - pos[j].y);
+                            double force = 1.0 / (dist + 0.01);
+                            dx[i] -= (pos[j].x - pos[i].x) * force * h;
+                            dy[i] -= (pos[j].y - pos[i].y) * force * h;
+                        }
+
+                        pos[i].x = pos[i].x + dx[i];
+                        pos[i].y = pos[i].y + dy[i];
+                    }
+
+                    Console.Write("\ngforce:{0:f3}", GlobalForce(sln.source));
+
+                    if (s % 50 == 0)
+                    {
+                        double[] x = new double[sln.source.N];
+                        double[] y = new double[sln.source.N];
+
+                        for (int j = 0; j < sln.source.N; j++)
+                        {
+                            x[j] = pos[j].x;
+                            y[j] = pos[j].y;
+                        }
+                        drawer.Paint(sln.source, x, y, 500, 500, string.Format("test_{1}_{0}.png", s / 50, k));
+                    }
+                }
+            }
+            return pos;
+        }
+
         public double GlobalForce(graph g)
         {
             double res = 0.0;

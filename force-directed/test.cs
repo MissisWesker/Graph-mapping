@@ -14,26 +14,41 @@ namespace force_directed
             point[] position;
             Random rand = new Random(0);
 
-            solution s = d.Reduce();
-            
-            position = new point[s.result.N];
+            Stack<solution> stack = new Stack<solution>();
+            do
+            {
+                solution s = d.Reduce();
+                stack.Push(s);
+                d = new Reducer(stack.Peek().result);
+            }
+            while (stack.Peek().result.N > 3);
+
+            position = new point[stack.Peek().result.N];
             for (int i = 0; i < position.Length; i++)
             {
                 position[i].x = rand.NextDouble();
                 position[i].y = rand.NextDouble();
             }
 
-            ForceDirected FD = new ForceDirected(s.result, position);
-            position = FD.Iterate(300);
-            int size = s.result.N;
-            double[] x = new double[size];
-            double[] y = new double[size];
+            ForceDirected FD = new ForceDirected(stack.Peek().result, position);
+            position = FD.Iterate(100);
+
+            int size = stack.Count;
             for (int i = 0; i < size; i++)
+            {
+                FD = new ForceDirected(stack.Peek());
+                position = FD.GetSolution(position);
+                stack.Pop();
+            }
+
+            double[] x = new double[g.N];
+            double[] y = new double[g.N];
+            for (int i = 0; i < g.N; i++)
             {
                 x[i] = position[i].x;
                 y[i] = position[i].y;
             }
-            drawer.Paint(s.result, x, y, 500, 500, "result_graph.png");
+            drawer.Paint(g, x, y, 500, 500, "result_graph.png");
             Console.ReadKey();
         }
 
